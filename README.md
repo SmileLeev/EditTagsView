@@ -1,0 +1,2 @@
+# EditTagsView
+Android自定义View，基于EditText和FlowLayout的标签编辑控件
