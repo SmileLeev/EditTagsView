@@ -2,7 +2,7 @@ package com.smile.edittagsview;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -186,6 +186,7 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		return false;
 	}
 
+	@SuppressLint("NewApi")
 	private void addTag(CharSequence text) {
 		mTags.add(text.toString());
 		TextView tagText = new TextView(getContext());
@@ -196,7 +197,8 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		if (tagBg == null) {
 			tagText.setBackgroundColor(Color.BLACK);
 		} else {
-			tagText.setBackgroundDrawable(tagBg);
+			Drawable nBg = tagBg.getConstantState().newDrawable();
+			tagText.setBackground(nBg);
 		}
 		tagText.setTextColor(Color.WHITE);
 		tagText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
