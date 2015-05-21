@@ -2,20 +2,26 @@ package com.smile.edittagsview;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputFilter.LengthFilter;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -30,10 +36,16 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		TextWatcher, OnKeyListener {
 	private static final int DEFAULT_HORIZONTAL_SPACING = 5;
 	private static final int DEFAULT_VERTICAL_SPACING = 5;
+	private static final int DEFAULT_MAX_COUNT = 10;
+	private static final int DEFAULT_MAX_LENGH = 10;
 	// 行间距
 	private int mVerticalSpacing;
 	// 列间距
 	private int mHorizontalSpacing;
+	// tag最大容量
+	private int mMaxCount;
+	// tag最大长度
+	private int mMaxLength;
 	// 内置输入框，用于接收输入
 	private EditText mEdtView;
 	// 确定的tag数量
@@ -53,6 +65,10 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		TypedArray a = context.obtainStyledAttributes(attrs,
 				R.styleable.EditTags);
 		try {
+			mMaxCount = a.getInteger(R.styleable.EditTags_tag_max_count,
+					DEFAULT_MAX_COUNT);
+			mMaxLength = a.getInteger(R.styleable.EditTags_tag_max_length,
+					DEFAULT_MAX_LENGH);
 			mHorizontalSpacing = a.getDimensionPixelSize(
 					R.styleable.EditTags_horizontal_spacing,
 					DEFAULT_HORIZONTAL_SPACING);
@@ -173,7 +189,23 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		mEdtView.setOnEditorActionListener(this);
 		mEdtView.addTextChangedListener(this);
 		mEdtView.setOnKeyListener(this);
+		if (mMaxLength > 0) {
+			InputFilter[] filters = { new LengthFilter(mMaxLength + 1) };
+			mEdtView.setFilters(filters);
+		}
 		addView(mEdtView);
+	}
+
+	@SuppressLint("ClickableViewAccessibility")
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (event.getAction() == KeyEvent.ACTION_DOWN) {
+			mEdtView.requestFocus();
+			InputMethodManager imm = (InputMethodManager) getContext()
+					.getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+		}
+		return super.onTouchEvent(event);
 	}
 
 	@Override
@@ -186,8 +218,17 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		return false;
 	}
 
-	@SuppressLint("NewApi")
+	@SuppressWarnings("deprecation")
 	private void addTag(CharSequence text) {
+		if (text == null) {
+			return;
+		}
+		if (mTags.size() >= mMaxCount) {
+			return;
+		}
+		if (TextUtils.isEmpty(text.toString().trim())) {
+			return;
+		}
 		mTags.add(text.toString());
 		TextView tagText = new TextView(getContext());
 		LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -198,13 +239,36 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 			tagText.setBackgroundColor(Color.BLACK);
 		} else {
 			Drawable nBg = tagBg.getConstantState().newDrawable();
-			tagText.setBackground(nBg);
+			tagText.setBackgroundDrawable(nBg);
 		}
 		tagText.setTextColor(Color.WHITE);
 		tagText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
 		tagText.setPadding(dp10, dp10 / 2, dp10, dp10 / 2);
 		addView(tagText, getChildCount() - 1);
 		mEdtView.setText("");
+	}
+
+	/**
+	 * get tags list
+	 * 
+	 * @return
+	 */
+	public List<String> getTags() {
+		return mTags;
+	}
+
+	/**
+	 * init tags(reset tags list)
+	 * 
+	 * @param tags
+	 */
+	public void setTags(List<String> tags) {
+		while (mTags.size() > 0) {
+			deleteLastTag();
+		}
+		for (String item : tags) {
+			addTag(item);
+		}
 	}
 
 	@Override
@@ -247,12 +311,15 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 			addTag(text);
 			return;
 		}
+		if (s.length() >= mMaxLength) {
+			s.delete(mMaxLength - 1, s.length());
+			return;
+		}
 		edtTag(text);
 		return;
 	}
 
 	private void edtTag(String string) {
-
 	}
 
 	@Override

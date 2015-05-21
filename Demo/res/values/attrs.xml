@@ -4,5 +4,7 @@
         <attr name="horizontal_spacing" format="dimension" />
         <attr name="vertical_spacing" format="dimension" />
         <attr name="tag_background" format="reference"/>
+        <attr name="tag_max_count" format="integer"/>
+        <attr name="tag_max_length" format="integer"/>
     </declare-styleable>
 </resources>
