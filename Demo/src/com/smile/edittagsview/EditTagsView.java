@@ -53,6 +53,7 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	// tag 背景
 	private Drawable tagBg;
 
+	private onTagAddListener mListener;
 	private int dp10;
 
 	public EditTagsView(Context context) {
@@ -88,6 +89,10 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 
 	public void setVerticalSpacing(int pixelSize) {
 		mVerticalSpacing = pixelSize;
+	}
+	
+	public void setTagListener(onTagAddListener listener){
+		this.mListener = listener;
 	}
 
 	@Override
@@ -221,13 +226,25 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	@SuppressWarnings("deprecation")
 	private void addTag(CharSequence text) {
 		if (text == null) {
-			return;
-		}
-		if (mTags.size() >= mMaxCount) {
+			if (mListener != null) {
+				mListener.onTagError(onTagAddListener.Type.STR_EMPTY);
+			}
 			return;
 		}
 		if (TextUtils.isEmpty(text.toString().trim())) {
+			if (mListener != null) {
+				mListener.onTagError(onTagAddListener.Type.STR_EMPTY);
+			}
 			return;
+		}
+		if (mTags.size() >= mMaxCount) {
+			if (mListener != null) {
+				mListener.onTagError(onTagAddListener.Type.COUNT_MAX);
+			}
+			return;
+		}
+		if (mListener != null) {
+			mListener.onTagAdd(text.toString());
 		}
 		mTags.add(text.toString());
 		TextView tagText = new TextView(getContext());
@@ -325,6 +342,14 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
+	}
+	
+	public interface onTagAddListener{
+		public enum Type{
+			STR_EMPTY,COUNT_MAX
+		}
+		void onTagAdd(String tag);
+		void onTagError(Type errorType);
 	}
 
 }
