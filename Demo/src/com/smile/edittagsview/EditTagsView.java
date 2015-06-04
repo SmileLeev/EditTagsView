@@ -328,12 +328,16 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 		String text = mEdtView.getText().toString();
 		if (index >= 0) {
 			text = text.substring(0, text.length() - 1);
+			mEdtView.setText(text);
+			mEdtView.setSelection(text.length());
 			addTag(text);
 			return;
 		}
 		index = s.toString().indexOf("，");
 		if (index >= 0) {
 			text = text.substring(0, text.length() - 1);
+			mEdtView.setText(text);
+			mEdtView.setSelection(text.length());
 			addTag(text);
 			return;
 		}
