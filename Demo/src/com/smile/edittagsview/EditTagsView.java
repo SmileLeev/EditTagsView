@@ -90,8 +90,8 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	public void setVerticalSpacing(int pixelSize) {
 		mVerticalSpacing = pixelSize;
 	}
-	
-	public void setTagListener(onTagAddListener listener){
+
+	public void setTagListener(onTagAddListener listener) {
 		this.mListener = listener;
 	}
 
@@ -273,6 +273,15 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	public List<String> getTags() {
 		return mTags;
 	}
+	
+	/**
+	 * get edtview
+	 * 
+	 * @return
+	 */
+	public EditText getEdtText(){
+		return mEdtView;
+	}
 
 	/**
 	 * init tags(reset tags list)
@@ -343,12 +352,14 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
 	}
-	
-	public interface onTagAddListener{
-		public enum Type{
-			STR_EMPTY,COUNT_MAX
+
+	public interface onTagAddListener {
+		public enum Type {
+			STR_EMPTY, COUNT_MAX
 		}
+
 		void onTagAdd(String tag);
+
 		void onTagError(Type errorType);
 	}
 
