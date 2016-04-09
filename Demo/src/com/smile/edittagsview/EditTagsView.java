@@ -98,6 +98,10 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		int myWidth = resolveSize(0, widthMeasureSpec);
+		if(myWidth == 0){
+			setMeasuredDimension(myWidth,resolveSize(0, heightMeasureSpec));
+			return ;
+		}
 
 		int paddingLeft = getPaddingLeft();
 		int paddingTop = getPaddingTop();
@@ -124,9 +128,13 @@ public class EditTagsView extends ViewGroup implements OnEditorActionListener,
 			int childHeight = childView.getMeasuredHeight();
 
 			lineHeight = Math.max(childHeight, lineHeight);
-
-			if (childLeft + childWidth + paddingRight > myWidth) {
-				childLeft = paddingLeft;
+			int wantWidth = childLeft + childWidth + paddingRight;
+			if (wantWidth > myWidth) {
+				if(wantWidth - myWidth < childWidth){
+					childLeft = paddingLeft + childWidth + mHorizontalSpacing;
+				}else{
+					childLeft = paddingLeft;
+				}
 				childTop += mVerticalSpacing + lineHeight;
 				lineHeight = childHeight;
 			} else {
